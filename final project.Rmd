@@ -1,0 +1,88 @@
+---
+title: "Final Project"
+output: html_document
+---
+
+The project repliates the paper "THE IMPACT OF DISEASE, GENDER, AND DISABILITY ON CHILDREN AND HOUSEHOLDS, Disease and Gender Gaps in Human Capital Investment: Evidence from Niger’s 1986 Meningitis Epidemic" by Belinda Archibong and Francis Annan, and focuses on the case of the 1986 Niger's national outburst of meningitis. This project asks this question:
+How does the 1986 meningitis shock impact the gender gap in Niger's education attainment?
+
+The data used for this research is 1) the published records on meningitis cases per 100, 000 population by WHO and the Ministry of Public Health in Niger, 2) published survey results of individuals' education and demograpics by the Nigerian Demographic and Health Surveys (DHS) in 1992 and 1998. 
+
+Last quarter I used Before & After and Diff & Diff design to compare two population groups. I chose the treatment group of people who are 6-12 year old when meningitis hits. As for the control group, I chose people who are 20-26 years old (beyond the school age) in 1986, since their education attainment would hardly be influenced by the hit of menin. By conducting this design, I found that the gender gap of educational attainment is much larger for the treatment group. 
+
+In this project, I will use regression models to examine the trend. To be more specific, I will run a interaction with an indicator of gender (dummy variable) with a cohort-based measure of meningitis exposure during the 1986 epidemic. The new model still follows DiD logic, in the sense that it both controls cohort(age) and gender difference.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(broom)
+library(texreg)
+```
+
+The regression equation can be written as follows:
+
+$$\text{education}_{iadrg} = \beta_{a}\text{MENIN}_{adt} * \text{female}_{ig} + \mu_{d} + \delta_{r} + \delta_{t} + \epsilon_{iadrg} $$
+In which we run regression of cohorts a and their educaion attainment for individuals i in district d at 
+survey round r to measures of exposure MENINadt that are interacted with the gender of individual femaleig, where t is the year of birth and g is gender. 
+
+In this model, we control 3 sets of fixed effects, which are districts, birth year and survey rounds, which are represented as mu_d, delta_r and delta_t. 
+
+
+
+Firstly we will use cases as the measure for meningitis exposure. The first model examines the linkaged between gender, cohort and exposure level. Fixed effects are realized by factors of "year", "NAME_2" and "year_birth".
+
+The second model examines how gender impacts educational attainment. The interaction is realized through the dummy variable "female".
+
+```{r}
+
+education <- read.csv("data/ner9212_chonly.csv")
+
+ner5<- lm(edu_years ~ female+ cohcase86_05 + cohcase86_612 + cohcase86_1320
+           + factor(year) + factor(NAME_2) + factor(year_birth), x=TRUE, y=TRUE, data=education)
+tidy_ner5 <- tidy(ner5)
+
+
+ner5a<- lm(edu_years~ female*cohcase86_05 + female*cohcase86_612 + female*cohcase86_1320
+            + factor(year) + factor(NAME_2) + factor(year_birth), x=TRUE, y=TRUE, data=education)
+tidy_ner5a <- tidy(ner5a) 
+
+```
+
+Similarly, use intensity as the measure for meningitis exposure. The first model examines the linkaged between gender, cohort and exposure level. Fixed effects are realized by factors of "year", "NAME_2" and "year_birth".
+
+The second model examines how gender impacts educational attainment. The interaction is realized through the dummy variable "female".
+
+```{r}
+nerIn5<- lm(edu_years~ female+ cohmonth86_05_in + cohmonth86_612_in + cohmonth86_1320_in
+             + factor(year)+ factor(NAME_2) + factor(year_birth), x=TRUE, y=TRUE, data=education)
+tidy_nerIn5 <- tidy(nerIn5) 
+
+
+nerIn5a<- lm(edu_years~ female*cohmonth86_05_in + female*cohmonth86_612_in + female*cohmonth86_1320_in
+              + factor(year) + factor(NAME_2) + factor(year_birth), x=TRUE, y=TRUE, data=education)
+tidy_nerIn5a <- tidy(nerIn5a) 
+```
+
+In order to present the results, now we need to include all the results in one table.
+
+```{r}
+screenreg(list(ner5, ner5a, nerIn5, nerIn5a), digits = 4)
+```
+
+The original paper uses a table of four columns to present the results, which I replicated as above. The fitst two columns are measured by cases, and the second two are measured by intensity. 
+
+The results that matter for our interpretation are the statistics for "female", the three cohorts and the interaction between female and the three cohorts. 
+
+The 1st and 3rd columns are display results for the linkages between educational attainment, gender, and meningitis exposure at the cohorts level. The gender variable is negative and significant (judged by p-values) in both columns, meaning that there is an existing gender gap in educational attainment level, which favor males. Meningitis exposure across almost all cohorts is negative and insignificant. It is barely significant in the MENIN intensity measure for primary school cohorts.
+
+The main rasults are in the 2nd and 4th columns where the meningitis exposure measures are interated with gender to examine gender-differentiated impacts of the meningitis burden on educational investments. Gender is negative and significant. Judeged by the p-values, only interaction terms for the school-going cohorts are negative and strongly significant at conventional levels.
+
+To be more specific, the impacts of meningitis is especially strong on girls who were exposed to it during school age, especially measured by cases. A case increase in the mean weekly meningitis cases per 100,000 population in each district is associated with a reduction of −0.042 years of schooling or a 3 percent to 4 percent decrease in years of education for girls who are 6-12 (primary school-going age) during the epidemic year. 
+Similar results are found for the secondary school-aged female sample (13-20), with increases in meningitis case exposure associated with a reduction of −0.03 years of schooling or 3 percent decrease in years of education. Reassuringly, the interaction is not significant for nonschool-going aged female respondents at the time of the epidemic.
+
+
+To conclude, the analysis of the effects of exposure to the 1986 meningitis epidemic on educational attainment of school-aged girls in Niger, reveals that the gender gap widened during the epidemic year. The effect is particularly significant for primary and secondary school-aged girls at the time of the epidemic. We find a significant decrease in years of education for school-aged female respondents at the time of the epidemic with no significant effect for their male counterparts. 
+
+```{r}
+devtools::session_info()
+```
