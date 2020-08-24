@@ -1,5 +1,5 @@
 
-#Title: Disease and Gender Gaps in Education Attainment: Evidence from Niger’s 1986 Meningitis Epidemic
+# Title: Disease and Gender Gaps in Education Attainment: Evidence from Niger’s 1986 Meningitis Epidemic
 
 The project repliates the paper "THE IMPACT OF DISEASE, GENDER, AND DISABILITY ON CHILDREN AND HOUSEHOLDS, Disease and Gender Gaps in Human Capital Investment: Evidence from Niger’s 1986 Meningitis Epidemic" by Belinda Archibong and Francis Annan and answer this question: How does the 1986 meningitis shock impact the gender gap in Niger's education attainment?
 
